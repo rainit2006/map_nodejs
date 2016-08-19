@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+  </head>
+  <body>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAI9lG6nVROs8c6yZSmxphzxn4AKSeFFFs"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="js/gmaps.min.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <div id="logonPage">
+        <h3> Please enter our password.</h3>
+        <input class="passwordInput" type="text" maxlength="14" />
+        <input id="enter" type = "button" value="Enter">
+        <div id="result"></div>
+    </div>
+    <div id="userLogon">
+        <div id="userView">...</div>
+        <div id="imageSeleted"></div>
+        <div id="imageList"></div>
+        <div id="logonForm">
+            <h3>please enter your name:</h3>
+            <input class="usernameInput" type="text" maxlength="14"/>
+            <input id="logon" type = "button" value="Enter">
+        </div>
+    </div>
+    <div id="HomePage">
+        <div id="container">
+            <div id="infoPanel"> My Info </div>
+            <div id="map"></div>
+            <div id="chatArea">
+                <div id="chatRoom">
+                    <ul class="messages"></ul>
+                </div>
+                <div id="chatForm">
+                  <input type="text" id="inputMessage" placeholder="Type here..."/>
+                  <input type="button" id="chatEnter" value="Enter">
+                </div>
+            </div>
+        </div>
+  </body>
+</html>
