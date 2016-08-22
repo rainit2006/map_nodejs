@@ -9,6 +9,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="js/gmaps.min.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
+    <script type="text/javascript" src="js/message.js"></script>
     <div id="logonPage">
         <h3> Please enter our password.</h3>
         <input class="passwordInput" type="text" maxlength="14" />
@@ -16,7 +17,7 @@
         <div id="result"></div>
     </div>
     <div id="userLogon">
-        <div id="userView">...</div>
+        <div class="userView"></div>
         <div id="imageSeleted"></div>
         <div id="imageList"></div>
         <div id="logonForm">
@@ -27,7 +28,8 @@
     </div>
     <div id="HomePage">
         <div id="container">
-            <div id="infoPanel"> My Info </div>
+            <div id="infoPanel">My Info</div>
+            <div class="userView">...</div>
             <div id="map"></div>
             <div id="chatArea">
                 <div id="chatRoom">
