@@ -14,7 +14,6 @@ $(function() {
   //var SECONDS_POSITION = 2000;
   //var SECONDS_DRAW = 5000;
   var IMAGENUM = 20;
-  var FADE_TIME = 150; // ms
   var myLatLng = {lat: 35.6311403, lng: 139.788367}; //TFTビル
   var myUser = {
     id: null,
@@ -96,7 +95,7 @@ function showImageList(){
           drawMarks();
       }
 
-      $('#infoPanel').empty().append("<p>"+myUser.username+"</p><p>My positon is (lat: "+myUser.position.lat+", lng:"+myUser.position.lng+")");
+      $('#infoPanel').empty().append("<p><span id='My'><img src='img/"+myUser.profileImage+".png'>"+myUser.username+"</span></p><p>My positon is (lat: "+myUser.position.lat+", lng:"+myUser.position.lng+")");
       socket.emit('add user', myUser);
 
       //update my position every 1 sec and update google map.
@@ -104,105 +103,57 @@ function showImageList(){
       //setInterval(drawMarks, SECONDS_DRAW);
   }
 
-  // Prevents input from having injected markup
-  function cleanInput (input) {
-      return $('<div/>').text(input).text();
-  }
 
   ///////////////HomePage/////////////////////
   $('#chatEnter').click(function(){
       sendMessage();
   });
 
-  function addParticipantsMessage (data) {
-    var message = '';
-    if (data.numUsers === 1) {
-      message += "there's 1 participant";
-    } else {
-      message += "there are " + data.numUsers + " participants";
-    }
-    log(message);
+  // Draw users list.
+  function drawUsers(){
+      if((Users == null)||(Users.length == 0)){
+          $('.userView').empty().append("There are no users now.");
+      }else{
+          var node = "<p>There are "+(Users.length -1)+" other users.</p>";
+          for(var i=0; i<Users.length; i++){
+              if(Users[i].username != myUser.username){
+                  node += "<span class='userspan' id='"+Users[i].username+"'><img src='img/"+Users[i].profileImage+".png'>"+Users[i].username+"</span>";
+              }
+          }
+          $('.userView').empty().append(node);
+      }
   }
 
-  // Sends a chat message
-  function sendMessage () {
-    var message = $('#inputMessage').val();
-    // Prevent markup from being injected into the message
-    message = cleanInput(message);
-    // if there is a non-empty message and a socket connection
-    if (message && connected) {
-      $('#inputMessage').val('');
-      var sendData = {
-        username: myUser.username,
-        profileImage:myUser.profileImage,
-        message: message
-      };
-      addChatMessage(sendData);
-      // tell server to execute 'new message' and send along one parameter
-      socket.emit('new message', sendData);
+  $(document).on('click', '#My', function(){
+      if(map != null){
+          map.setCenter(myUser.position.lat, myUser.position.lng);
+      }
+  });
+
+  $(document).on( 'click', '.userspan', function() {
+    //alert( 'WORKS!' );
+    var username = $(this).attr('id');
+    var user = findByName(username);
+    if(map != null){
+      map.setCenter(user.position.lat, user.position.lng);
+      map.drawRoute({
+           origin: [myUser.position.lat, myUser.position.lng],
+           destination: [user.position.lat, user.position.lng],
+           travelMode: 'driving',
+           strokeColor: '#131540',
+           strokeOpacity: 0.6,
+           strokeWeight: 6
+       });
     }
-  }
+ });
 
-  // Log a message
-  function log (message, options) {
-    var $el = $('<li>').addClass('log').text(message);
-    addMessageElement($el, options);
-  }
-
-  function addChatMessage (data, options) {
-      options = options || {};
-
-      var $usernameDiv = $('<img src="img/'+data.profileImage+'.png"><span class="username"/>')
-        .text(data.username)
-        .css('color', getUsernameColor(data.username));
-      var $messageBodyDiv = $('<span class="messageBody">')
-        .text(data.message);
-
-      var $messageDiv = $('<li class="message"/>')
-        .data('username', data.username)
-        .append($usernameDiv, $messageBodyDiv);
-
-      addMessageElement($messageDiv, options);
-    }
-
-    function addMessageElement (el, options) {
-      var $el = $(el);
-
-      // Setup default options
-      if (!options) {
-        options = {};
-      }
-      if (typeof options.fade === 'undefined') {
-        options.fade = true;
-      }
-      if (typeof options.prepend === 'undefined') {
-        options.prepend = false;
-      }
-
-      // Apply options
-      if (options.fade) {
-        $el.hide().fadeIn(FADE_TIME);
-      }
-      if (options.prepend) {
-        $('.messages').prepend($el);
-      } else {
-        $('.messages').append($el);
-      }
-      $('.messages')[0].scrollTop = $('.messages')[0].scrollHeight;
-    }
-
-
-    // Gets the color of a username through our hash function
-  function getUsernameColor (username) {
-    // Compute hash code
-    var hash = 7;
-    for (var i = 0; i < username.length; i++) {
-       hash = username.charCodeAt(i) + (hash << 5) - hash;
-    }
-    // Calculate color
-    var index = Math.abs(hash % COLORS.length);
-    return COLORS[index];
-  }
+ function findByName(username){
+   for(var i = 0; i < Users.length; i++){
+     if(Users[i].username == username){
+        return Users[i];
+     }
+   }
+ }
 
   // Socket events
   socket.on('access result', function(data){
@@ -213,15 +164,7 @@ function showImageList(){
           $('#logonPage').fadeOut("slow");
           $('#userLogon').show();
           Users = data.users;
-          if((Users == null)||(Users.length == 0)){
-              $('#userView').empty().append("There are no users now.");
-          }else{
-              var node = "There are "+Users.length+" users.";
-              for(var i=0; i<Users.length; i++){
-                  node += "<span><img src='img/"+Users[i].profileImage+".png'>"+Users[i].username+"</span>";
-              }
-              $('#userView').empty().append(node);
-          }
+          drawUsers();
       }
   });
 
@@ -234,6 +177,8 @@ function showImageList(){
       prepend: true
     });
     addParticipantsMessage(data);
+    Users = data.users;
+    drawUsers();
   });
   // Whenever the server emits 'new message', update the chat body
 
@@ -245,8 +190,24 @@ function showImageList(){
   socket.on('user joined', function (data) {
     console.log('user joined:'+data.user.username);
     log(data.user.username + ' joined');
-    Users.push(data.user);
+
+    if((Users == null)||(Users.length == 0)){
+      Users.push(data.user);
+    }else{
+      var i ;
+      for(i= 0; i < Users.length; i++){
+          if(Users[i].username == data.user.username){
+              Users[i] = data.user;
+              break;
+          }
+      }
+      if(i>= Users.length){
+          Users.push(data.user);
+      }
+    }
+
     addParticipantsMessage(data);
+    drawUsers();
   });
 
   ///update user position.
@@ -256,9 +217,9 @@ function showImageList(){
         console.log('ERR: update postion. but Users is null.');
         Users.push(data);
      }else{
-         $.each(Users, function(){
-            if(this.username == data.username){
-                this.position = data.position;
+         $.each(Users, function(index){
+            if(Users[index].username == data.username){
+                Users[index] = data;
                 return;
             }
          });
@@ -271,6 +232,7 @@ function showImageList(){
             Users.splice(i, 1);
         }
      }
+     drawUsers();
   });
 
   ///////////Google Map///////////////////////
@@ -279,7 +241,10 @@ function showImageList(){
           div: '#map',
           lat: myUser.position.lat,
           lng: myUser.position.lng,
-          zoom: 9
+          zoom: 9,
+          click: function(e){
+            map.cleanRoute();
+          }
         });
 
         console.log("initMap finished.");
@@ -300,9 +265,9 @@ function showImageList(){
               always: function() {
               }
           });
-          if(map != null){
-              map.setCenter(myUser.position.lat, myUser.position.lng);
-          }
+          // if(map != null){
+          //     map.setCenter(myUser.position.lat, myUser.position.lng);
+          // }
           if(myUser.position != null){
               //console.log('emit my position');
               socket.emit('update position', myUser);
