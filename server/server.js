@@ -39,11 +39,12 @@ io.on('connection', function (socket) {
 
     // we store the username in the socket session for this client
     socket.username = data.username;
-    Users.push({username: data.username, profileImage: data.profileImage});
+    Users.push(data);
     ++numUsers;
     addedUser = true;
     socket.emit('login', {
-      numUsers: numUsers
+      numUsers: numUsers,
+      users: Users
     });
     // echo globally (all clients) that a person has connected
     socket.broadcast.emit('user joined', {
@@ -51,6 +52,7 @@ io.on('connection', function (socket) {
       numUsers: numUsers});
 
     console.log('add user:'+data.username+'; num:'+numUsers);
+    console.log(Users);
 
   });
 
