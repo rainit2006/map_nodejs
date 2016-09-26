@@ -52,7 +52,7 @@ io.on('connection', function (socket) {
       numUsers: numUsers});
 
     console.log('add user:'+data.username+'; num:'+numUsers);
-    console.log(Users);
+    //console.log(Users);
 
   });
 
