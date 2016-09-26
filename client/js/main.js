@@ -4,13 +4,10 @@ $(function() {
   var map;
 
   var connected = false;
-  var COLORS = [
-    '#e21400', '#91580f', '#f8a700', '#f78b00',
-    '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
-    '#3b88eb', '#3824aa', '#a700ff', '#d300e7'
-  ];
 
-  var SECONDS = 3000;
+  var logon = false;
+
+  var SECONDS = 5000;
   //var SECONDS_POSITION = 2000;
   //var SECONDS_DRAW = 5000;
   var IMAGENUM = 20;
@@ -22,10 +19,10 @@ $(function() {
     position:myLatLng
   };
 
-  var testUser = {
+  var CompanyUser = {
     id: 0,
-    username:'test',
-    profileImage:18,
+    username:'本社',
+    profileImage:"company",
     position: myLatLng
   }
   var Users = [];
@@ -38,6 +35,7 @@ $(function() {
     $('#userLogon').hide();
     //$('#userLogon').trigger('click');
     $('#HomePage').show();
+    logon = true;
 
     init();
     console.log("refresh  "+myUser.username);
@@ -47,6 +45,31 @@ $(function() {
 
 
 /////////////Logon Page//////////////////////
+  $('#enter').click(function(){
+      logonPocess();
+  });
+
+  // $(window).keydown(function (event) {
+  //   if (event.which === 13) {
+  //     if (!logon) {
+  //       logonPocess();
+  //     }
+  //   }
+  // });
+
+  function logonPocess(){
+    var password = cleanInput($('.passwordInput').val().trim());
+    if(password === ""){
+      $('#result').empty().append('<p>your password is wrong!</p>');
+      return;
+    }
+    socket.emit('an user access', password);
+    $('#result').empty().append('<p>please wait....</p>');
+    showImageList();
+  }
+
+  /////////////User Logon Page//////////////////////
+
 function showImageList(){
   var selectedImgID = Math.floor( Math.random() * 20 ) ;
   $("#imageSeleted").empty().append("<h3>Please select your favorite profile image.</h3><img src='img/"+selectedImgID+".png'>");
@@ -68,13 +91,7 @@ function showImageList(){
 }
 
 
-  $('#enter').click(function(){
-      //send to server.
-      var password = cleanInput($('.passwordInput').val().trim());
-      socket.emit('an user access', password);
-      $('#result').empty().append('<p>please wait....</p>');
-      showImageList();
-  });
+
 
   $('#logon').click(function(){
           username = cleanInput($('.usernameInput').val().trim());
@@ -106,7 +123,7 @@ function showImageList(){
 
   ///////////////HomePage/////////////////////
   $('#chatEnter').click(function(){
-      sendMessage();
+      sendMessage(myUser, socket);
   });
 
   // Draw users list.
@@ -301,24 +318,24 @@ function showImageList(){
            }
          });
 
-        if(testUser != null){
+        if(CompanyUser != null){
           var image = {
-              url:'img/'+testUser.profileImage+'.png',
+              url:'img/'+CompanyUser.profileImage+'.png',
               scaledSize: new google.maps.Size(30, 30),
               origin: new google.maps.Point(0, 0),
               anchor: new google.maps.Point(0, 0)
           };
           map.addMarker({
-             lat: testUser.position.lat,
-             lng: testUser.position.lng,
+             lat: CompanyUser.position.lat,
+             lng: CompanyUser.position.lng,
              icon: image,
-             title: testUser.username,
+             title: CompanyUser.username,
              click: function(e){
                  //map.setCenter(e.position);
-                 console.log("testUser is clicked.");
+                 console.log("CompanyUser is clicked.");
                  map.drawRoute({
                       origin: [myUser.position.lat, myUser.position.lng],
-                      destination: [testUser.position.lat, testUser.position.lng],
+                      destination: [CompanyUser.position.lat, CompanyUser.position.lng],
                       travelMode: 'driving',
                       strokeColor: '#131540',
                       strokeOpacity: 0.6,

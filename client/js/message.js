@@ -1,3 +1,10 @@
+var COLORS = [
+  '#e21400', '#91580f', '#f8a700', '#f78b00',
+  '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
+  '#3b88eb', '#3824aa', '#a700ff', '#d300e7'
+];
+
+
 function addParticipantsMessage (data) {
   var message = '';
   if (data.numUsers === 1) {
@@ -9,12 +16,12 @@ function addParticipantsMessage (data) {
 }
 
 // Sends a chat message
-function sendMessage () {
+function sendMessage (myUser, socket) {
   var message = $('#inputMessage').val();
   // Prevent markup from being injected into the message
   message = cleanInput(message);
   // if there is a non-empty message and a socket connection
-  if (message && connected) {
+  if (message) {
     $('#inputMessage').val('');
     var sendData = {
       username: myUser.username,
